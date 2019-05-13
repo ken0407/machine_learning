@@ -93,15 +93,32 @@ test.drop("Embarked",axis=1,inplace=True)
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 cols = list(train.columns)
+features = train[cols[2:]]
+target = train[cols[1]]
 
-train_X,train_y,test_X,test_y = train_test_split(train[cols[2:]],train[cols[1]],test_size=0.3,random_state=1234)
-
-train_X.to_csv("mod_train.csv",index=False)
+features.to_csv("mod_train.csv",index=False)
 
 ss = StandardScaler()
-train_X_std = pd.DataFrame(ss.fit_transform(train_X),columns=cols[2:])
-train_X_std.to_csv("std_mod_train.csv",index=False)
+features_std = pd.DataFrame(ss.fit_transform(features),columns=cols[2:])
+features_std.to_csv("std_mod_features.csv",index=False)
 
 ms = MinMaxScaler()
-train_X_mm = pd.DataFrame(ms.fit_transform(train_X),columns=cols[2:])
-train_X_mm.to_csv("minmax_mod_train.csv",index=False)
+features_mm = pd.DataFrame(ms.fit_transform(features),columns=cols[2:])
+features_mm.to_csv("minmax_mod_features.csv",index=False)
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_score
+from copy import copy
+base_cols = cols[2:-3]
+encoded_Emb_cols = cols[-3:]
+scores = []
+
+for col_name in encoded_Emb_cols:
+    tmp_cols = copy(base_cols)
+    tmp_cols.append(col_name)
+    print(tmp_cols)
+    clf = LogisticRegression()
+    score = cross_val_score(clf, features_std[tmp_cols] , target, cv=3)
+    scores.append(np.mean(score))
+
+print(scores)
