@@ -122,3 +122,24 @@ for col_name in encoded_Emb_cols:
     scores.append(np.mean(score))
 
 print(scores)
+
+
+#MLP
+from keras.models import Model
+from keras.layers import Input,Dense,Dropout
+from keras.optimizers import Adam
+
+def build_model(x):
+    dr = 0.3
+    lr =0.1
+
+    inputs = Input(shape=(x.shape[1],))
+    x = Dropout(dr)(Dense(30,activation="relu")(inputs))
+    x = Dropout(dr)(Dense(50,activation="relu")(x))
+    x = Dense(1,activation="sigmoid")(x)
+    model = Model(inputs,x)
+    model.compile(loss="binary_crossentropy",optimizer="adam")
+    return model
+model = build_model(features)
+model.fit(features,target,batch_size=60,epochs=100)
+pred = model.predict(features)
